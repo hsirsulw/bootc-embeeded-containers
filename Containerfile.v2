@@ -6,6 +6,7 @@ RUN dnf config-manager \
         --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
 RUN dnf install -y firewalld microshift* && \
     systemctl enable microshift && \
+    dnf update -y && \
     dnf clean all
 
 # Create a default 'redhat' user with the specified password.
@@ -49,16 +50,15 @@ ENV IMAGE_LIST_FILE=${IMAGE_STORAGE_DIR}/image-list.txt
 RUN --mount=type=secret,id=pullsecret,dst=/run/secrets/pull-secret.json \
     images="$(jq -r ".images[]" /usr/share/microshift/release/release-"$(uname -m)".json)" ; \
     mkdir -p "${IMAGE_STORAGE_DIR}" ; \
+    skopeo copy --all --preserve-digests "docker://docker.io/library/wordpress:6.2.1-apache" "dir:$IMAGE_STORAGE_DIR/${sha}" ; \
+    skopeo copy --all --preserve-digests "docker://docker.io/library/mysql:8.0" "dir:$IMAGE_STORAGE_DIR/${sha}" ; \
     for img in ${images} ; do \
         sha="$(echo "${img}" | sha256sum | awk '{print $1}')" ; \
         skopeo copy --all --preserve-digests \
             --authfile /run/secrets/pull-secret.json \
             "docker://${img}" "dir:$IMAGE_STORAGE_DIR/${sha}" ; \
         echo "${img},${sha}" >> "${IMAGE_LIST_FILE}" ; \
-    done ; \
-    skopeo copy --all --preserve-digests "docker://docker.io/library/wordpress:6.2.1-apache" "dir:$IMAGE_STORAGE_DIR/${sha}" ; 
-    echo "docker.io/library/wordpress:6.2.1-apache,f3b8d54fe9b80e88255121a46933ca1961fb9f3f39e6981a668cdb7f019a5bbd" >> "${IMAGE_LIST_FILE}" ; \
-    cat ${IMAGE_LIST_FILE}"
+    done
 # Install a systemd drop-in unit to address the problem with image upgrades
 # overwriting the container images in additional store. The workaround is to
 # copy the images from the pre-loaded to the main container storage.
