@@ -112,17 +112,21 @@ registry.redhat.io/openshift-service-mesh-tech-preview/istio-rhel9-operator   <n
 registry.redhat.io/openshift4/ose-kube-rbac-proxy                             <none>              7e66f8a4c4202       456MB
 [root@localhost ~]# 
 
-[root@localhost ~]# podman pull quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2
-Trying to pull quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2...
+[root@localhost ~]# mkdir /var/tmp/bootc-upgrade
+[root@localhost ~]# skopeo copy docker://quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2 dir://var/tmp/bootc-upgrade
 Getting image source signatures
-Copying blob 73299d564c44 skipped: already exists  
-(..)
+Copying blob 999c0822dc1d done   | 
+Copying blob 999c0822dc1d done   | 
+Copying blob 8bfc0e089ba9 done   | 
+Copying blob 8bfc0e089ba9 done   | 
+Copying blob 8bfc0e089ba9 done   | 
+Copying blob 73299d564c44 [========>-----------------------------] 90.3MiB / 387.8MiB | 577.5 KiB/s
 
-[root@localhost ~]# bootc switch quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2
+[root@localhost ~]# bootc switch --transport dir /var/tmp/bootc-upgrade/
 layers already present: 67; layers needed: 11 (3.1 GB)
-Fetched layers: 2.90 GiB in 2 minutes (30.91 MiB/s)
+Fetched layers: 2.90 GiB in 41 seconds (72.80 MiB/s)
 Pruned images: 1 (layers: 0, objsize: 0 bytes)
-Queued for next boot: quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2
+Queued for next boot: ostree-unverified-image:dir:/var/tmp/bootc-upgrade/
   Version: 9.20241019.0
   Digest: sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
 [root@localhost ~]# 
@@ -134,47 +138,94 @@ metadata:
   name: host
 spec:
   image:
-    image: quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2
-    transport: registry
+    image: /var/tmp/bootc-upgrade/
+    transport: dir
   bootOrder: default
 status:
   staged:
     image:
       image:
-        image: quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2
-        transport: registry
+        image: /var/tmp/bootc-upgrade/
+        transport: dir
       version: 9.20241019.0
-      timestamp: null
-      imageDigest: sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
-    cachedUpdate: null
-    incompatible: false
-    pinned: false
-    store: ostreeContainer
-    ostree:
-      checksum: f5a3a2d5f8a967ec20e074cc79ca16535fba0fa7542e8175de1f06a21576f439
-      deploySerial: 0
-  booted:
-    image:
-      image:
-        image: localhost/microshift-4.18-bootc-embedded
-        transport: registry
-      version: 9.20241019.0
-      timestamp: null
-      imageDigest: sha256:50bf08f2971ec1022ab83fd74e9f38124afde18cea6f83c3d3a559c74ffb2715
-    cachedUpdate: null
-    incompatible: false
-    pinned: false
-    store: ostreeContainer
-    ostree:
-      checksum: 52f3dc10f6f84da017b5620450f1126cc0c811738b427368495d9de5b8bd65da
-      deploySerial: 0
-  rollback: null
-  rollbackQueued: false
-  type: bootcHost
+
+[root@localhost ~]# rpm-ostree status
+State: idle
+Deployments:
+  ostree-unverified-image:dir:/var/tmp/bootc-upgrade/
+                   Digest: sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
+                  Version: 9.20241019.0 (2025-04-01T17:34:20Z)
+                     Diff: 239 upgraded, 11 added
+
+● ostree-unverified-registry:localhost/microshift-4.18-bootc-embedded
+                   Digest: sha256:50bf08f2971ec1022ab83fd74e9f38124afde18cea6f83c3d3a559c74ffb2715
+                  Version: 9.20241019.0 (2025-04-01T16:27:15Z)
+[root@localhost ~]# 
+
 [root@localhost ~]# bootc upgrade --apply
-No changes in quay.io/rhn_support_arolivei/microshift-4.18-bootc:v2 => sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
+No changes in ostree-unverified-image:dir:/var/tmp/bootc-upgrade/ => sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
 Staged update present, not changed.
 Rebooting system
-Connection to 192.168.122.14 closed by remote host.
-Connection to 192.168.122.14 closed.
+
+[root@localhost ~]# bootc status
+No staged image present
+Current booted image: dir:/var/tmp/bootc-upgrade/
+    Image version: 9.20241019.0 (2025-04-01 17:34:20.447641674 UTC)
+    Image digest: sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
+Current rollback image: localhost/microshift-4.18-bootc-embedded
+    Image version: 9.20241019.0 (2025-04-01 16:27:15.294366008 UTC)
+    Image digest: sha256:50bf08f2971ec1022ab83fd74e9f38124afde18cea6f83c3d3a559c74ffb2715
+[root@localhost ~]# rpm-ostree status
+State: idle
+Deployments:
+● ostree-unverified-image:dir:/var/tmp/bootc-upgrade/
+                   Digest: sha256:e75e8c447546b8c5c4fffaccb2e5f4e870559747d688335c91b68d08bdaba5c4
+                  Version: 9.20241019.0 (2025-04-01T17:34:20Z)
+
+  ostree-unverified-registry:localhost/microshift-4.18-bootc-embedded
+                   Digest: sha256:50bf08f2971ec1022ab83fd74e9f38124afde18cea6f83c3d3a559c74ffb2715
+                  Version: 9.20241019.0 (2025-04-01T16:27:15Z)
+[root@localhost ~]# 
+
+
+[root@localhost ~]# podman images
+REPOSITORY                                                                   TAG           IMAGE ID      CREATED        SIZE
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        86a73a727e4f  4 weeks ago    492 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        03ec3ae43b5e  4 weeks ago    579 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        3936b2921a18  5 weeks ago    657 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        243083e135a2  5 weeks ago    481 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        d5f9bd9ceaa3  5 weeks ago    490 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        70c4abc55055  5 weeks ago    439 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        fb7536807420  5 weeks ago    466 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        69488e7d6948  5 weeks ago    857 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        27f3bf3a2d3d  5 weeks ago    460 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        876a1efeb9a9  5 weeks ago    393 MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                               <none>        d9fb51bc3434  5 weeks ago    462 MB
+docker.io/library/mysql                                                      8.0           1c83f38450c3  2 months ago   781 MB
+registry.redhat.io/lvms4/lvms-rhel9-operator                                 <none>        2b9159626250  6 months ago   218 MB
+registry.redhat.io/openshift-service-mesh-tech-preview/istio-pilot-rhel9     <none>        f740c90dc321  6 months ago   291 MB
+registry.redhat.io/openshift-service-mesh-tech-preview/istio-rhel9-operator  <none>        2b7be54340b4  6 months ago   155 MB
+registry.redhat.io/openshift4/ose-kube-rbac-proxy                            <none>        7e66f8a4c420  19 months ago  456 MB
+docker.io/library/wordpress                                                  6.2.1-apache  b8ee07adfa91  22 months ago  629 MB
+[root@localhost ~]# crictl images
+IMAGE                                                                         TAG                 IMAGE ID            SIZE
+docker.io/library/mysql                                                       8.0                 1c83f38450c37       781MB
+docker.io/library/wordpress                                                   6.2.1-apache        b8ee07adfa917       629MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              d9fb51bc34340       462MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              d5f9bd9ceaa33       490MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              86a73a727e4f0       492MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              03ec3ae43b5e7       579MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              69488e7d69489       857MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              243083e135a20       481MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              3936b2921a18f       657MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              70c4abc55055c       439MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              fb7536807420b       466MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              876a1efeb9a93       393MB
+quay.io/openshift-release-dev/ocp-v4.0-art-dev                                <none>              27f3bf3a2d3da       460MB
+registry.redhat.io/lvms4/lvms-rhel9-operator                                  <none>              2b91596262502       218MB
+registry.redhat.io/openshift-service-mesh-tech-preview/istio-pilot-rhel9      <none>              f740c90dc3217       291MB
+registry.redhat.io/openshift-service-mesh-tech-preview/istio-rhel9-operator   <none>              2b7be54340b4c       155MB
+registry.redhat.io/openshift4/ose-kube-rbac-proxy                             <none>              7e66f8a4c4202       456MB
+[root@localhost ~]# 
+
 ~~~
