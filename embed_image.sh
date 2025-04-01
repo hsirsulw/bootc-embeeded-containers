@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 image=$1
-additional_copy_args=${2:-""}
+additional_copy_args="${2:-""} ${3:-""}"
 
 mkdir -p /usr/lib/containers-image-cache
 sha=$(echo "$image" | sha256sum | awk '{ print $1 }')
