@@ -1,12 +1,8 @@
-FROM registry.redhat.io/rhel9-eus/rhel-9.6-bootc:9.6
-#FROM registry.distributed-ci.io/rhel9/rhel-bootc:9.6-1745774951
-ARG USHIFT_VER=4.19
+FROM registry.redhat.io/rhel9-eus/rhel-9.4-bootc:9.4
+ARG USHIFT_VER=4.18
+ARG VERSION_ID="9.4"
 
-RUN . /etc/os-release && dnf upgrade -y --releasever="${VERSION_ID}" && \
-    dnf config-manager \
-        --set-enabled "rhocp-${USHIFT_VER}-for-rhel-9-$(uname -m)-rpms" \
-        --set-enabled "fast-datapath-for-rhel-9-$(uname -m)-rpms" && \
-    dnf install -y firewalld jq microshift microshift-release-info cockpit openscap-utils scap-security-guide && \
+RUN dnf install -y --releasever="${VERSION_ID}" firewalld jq microshift microshift-release-info cockpit openscap-utils scap-security-guide && \
     systemctl enable microshift && \
     dnf clean all
 
@@ -49,6 +45,7 @@ RUN systemctl enable microshift-make-rshared.service
 
 COPY wordpress /usr/lib/microshift/manifests.d/wordpress
 
+## Apply kernel tuning for CIS hardening compliance
 RUN cat > /etc/sysctl.d/99-cis-hardening.conf <<'EOF'
 # IPv6 Settings
 net.ipv6.conf.all.accept_ra = 0
@@ -69,4 +66,4 @@ RUN echo "AllowUsers redhat" >> /etc/ssh/sshd_config
 # Run scan and hardening
 RUN oscap-im --profile xccdf_org.ssgproject.content_profile_cis /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml
 # Run eval to check final result
-#RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml || test $? = 2
+#RUN oscap xccdf eval --profile xccf_org.ssgproject.content_profile_cis /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml || test $? = 2
