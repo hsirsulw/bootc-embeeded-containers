@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-PULL_SECRET=.pull-secret.json
 IMAGE_NAME=microshift-4.19-bootc-embeeded
 REGISTRY_URL=quay.io
 TAG=$1
@@ -16,8 +15,10 @@ REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
 BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
 
 echo "#### Building a new bootc image with MicroShift and application Container images embeeded to it"
-podman build --authfile "${PULL_SECRET}" -t "${IMAGE_NAME}:${TAG}" \
-    --secret "id=pullsecret,src=${PULL_SECRET}" \
+sudo podman build -t "${IMAGE_NAME}:${TAG}" \
+    --volume /etc/rhsm:/etc/rhsm:ro,z \
+    --volume /etc/pki/entitlement:/etc/pki/entitlement:ro,z \
+    --volume /etc/yum.repos.d:/etc/yum.repos.d:ro,z \
     --build-arg USHIFT_BASE_IMAGE_NAME="${BASE_IMAGE_NAME}" \
     --build-arg USHIFT_BASE_IMAGE_TAG=${TAG} \
     -f Containerfile.${TAG}
@@ -26,7 +27,7 @@ echo "#### pushing bootc image to a registry"
 podman push "localhost/${IMAGE_NAME}:${TAG}" "${REGISTRY_URL}/${REGISTRY_IMG}:${TAG}"
 
 echo "#### creating ISO from bootc image"
-podman run --authfile "${PULL_SECRET}" --rm -it --privileged \
+podman run --rm -it --privileged \
     --security-opt label=type:unconfined_t \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     -v ./output:/output \

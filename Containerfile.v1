@@ -1,8 +1,7 @@
-FROM localhost/microshift-4.19-bootc:latest
+FROM localhost/microshift-4.18-bootc:latest
 
 ARG USHIFT_BASE_IMAGE_NAME
 ARG USHIFT_BASE_IMAGE_TAG
-#FROM $USHIFT_BASE_IMAGE_NAME:$USHIFT_BASE_IMAGE_TAG
 
 ENV IMAGE_STORAGE_DIR=/usr/lib/containers/storage
 ENV IMAGE_LIST_FILE=${IMAGE_STORAGE_DIR}/image-list.txt
