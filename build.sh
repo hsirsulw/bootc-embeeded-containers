@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-IMAGE_NAME=microshift-4.19-bootc-embeeded
+IMAGE_NAME=microshift-4.18-bootc-embeeded
 REGISTRY_URL=quay.io
 TAG=$1
 
@@ -11,8 +11,8 @@ if [ -z "$TAG" ]; then
     exit 1
 fi
 
-REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
-BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
+#REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
+BASE_IMAGE_NAME=microshift-4.18-bootc:${TAG}
 
 echo "#### Building a new bootc image with MicroShift and application Container images embeeded to it"
 sudo podman build -t "${IMAGE_NAME}:${TAG}" \
@@ -23,8 +23,8 @@ sudo podman build -t "${IMAGE_NAME}:${TAG}" \
     --build-arg USHIFT_BASE_IMAGE_TAG=${TAG} \
     -f Containerfile.${TAG}
 
-echo "#### pushing bootc image to a registry"
-podman push "localhost/${IMAGE_NAME}:${TAG}" "${REGISTRY_URL}/${REGISTRY_IMG}:${TAG}"
+#echo "#### pushing bootc image to a registry"
+#podman push "localhost/${IMAGE_NAME}:${TAG}" "${REGISTRY_URL}/${REGISTRY_IMG}:${TAG}"
 
 echo "#### creating ISO from bootc image"
 podman run --rm -it --privileged \
