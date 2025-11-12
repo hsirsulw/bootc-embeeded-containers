@@ -1,9 +1,7 @@
-#FROM registry.redhat.io/rhel9/rhel-bootc:9.4
 FROM localhost/microshift-4.19-bootc-embeeded:v1
-ARG USHIFT_VER=4.19
 
-RUN dnf config-manager \
-        --set-enabled rhocp-${USHIFT_VER}-for-rhel-9-$(uname -m)-rpms \
-        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms 
+## Needed as bootc-image-builder requires a repo file to be present in the base image.
+# we replace the 4.19 repo with the 4.20 repo to allow upgrade MicroShift to 4.20. 
+ADD redhat-96-420.repo /etc/yum.repos.d/redhat.repo
 RUN dnf update --enablerepo=rhel-9-for-$(uname -m)-baseos-eus-rpms --enablerepo=rhel-9-for-x86_64-appstream-eus-rpms -y --releasever=9.6 && \
     dnf clean all

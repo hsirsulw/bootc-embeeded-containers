@@ -20,6 +20,7 @@ sudo podman build -t "${IMAGE_NAME}:${TAG}" \
     --volume /etc/pki/entitlement:/etc/pki/entitlement:ro,z \
     --volume /etc/yum.repos.d:/etc/yum.repos.d:ro,z \
     --volume /etc/containers/registries.conf.d/99-mirrors.conf:/etc/containers/registries.conf.d/99-mirrors.conf:ro,z \
+    --volume /etc/containers/policy.json:/etc/containers/policy.json:ro,z \
     --build-arg USHIFT_BASE_IMAGE_NAME="${BASE_IMAGE_NAME}" \
     --build-arg USHIFT_BASE_IMAGE_TAG=${TAG} \
     -f Containerfile.${TAG}
