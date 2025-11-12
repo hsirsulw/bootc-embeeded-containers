@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ISO="${SCRIPT_DIR}/${ISO_FILE}"
 TARGET_ISO="${LIBVIRT_IMAGES_DIR}/${ISO_FILE}"
 SOURCE_KS="${SCRIPT_DIR}/${KS_FILE}"
-TEMP_KS="/tmp/kickstart-${VMNAME}.ks"
+TEMP_KS="/tmp/kickstart.ks"
 
 # Check if source ISO file exists
 if [ ! -f "${SOURCE_ISO}" ]; then
@@ -38,6 +38,7 @@ else
 fi
 
 # Create or use existing kickstart file
+# Use a temp file named kickstart.ks to match what we reference in --extra-args
 if [ -f "${SOURCE_KS}" ]; then
     echo "Using existing kickstart file: ${SOURCE_KS}"
     cp "${SOURCE_KS}" "${TEMP_KS}"
