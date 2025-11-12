@@ -1,5 +1,5 @@
 VMNAME=microshift-4.19-bootc-vm1
-NETNAME=default
+NETNAME=bootc-isolated
 #sudo virt-install \
 #    --name ${VMNAME} \
 #    --vcpus 2 \
