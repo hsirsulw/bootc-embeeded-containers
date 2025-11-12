@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-IMAGE_NAME=microshift-4.18-bootc-embeeded
+IMAGE_NAME=microshift-4.19-bootc-embeeded
 REGISTRY_URL=quay.io
 TAG=$1
 
@@ -12,7 +12,7 @@ if [ -z "$TAG" ]; then
 fi
 
 #REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
-BASE_IMAGE_NAME=microshift-4.18-bootc:${TAG}
+BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
 
 echo "#### Building a new bootc image with MicroShift and application Container images embeeded to it"
 sudo podman build -t "${IMAGE_NAME}:${TAG}" \
@@ -30,10 +30,9 @@ sudo podman build -t "${IMAGE_NAME}:${TAG}" \
 sudo mkdir -p /var/tmp/bootc-images
 echo "#### creating ISO from bootc image"
 sudo podman run --rm -it --privileged --security-opt label=type:unconfined_t \
-    -v /var/lib/containers/storage:/var/lib/containers/storage \
-    -v /var/tmp/bootc-images:/output \
-    --volume /etc/rhsm:/etc/rhsm:ro \
-    --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
-    --volume /etc/yum.repos.d:/etc/yum.repos.d:ro \
+   -v /var/lib/containers/storage:/var/lib/containers/storage \
+   -v /var/tmp/bootc-images:/output \
+   --volume /etc/rhsm:/etc/rhsm:ro \
+   --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
     registry.redhat.io/rhel9/bootc-image-builder:latest \
-    --local --type iso localhost/${IMAGE_NAME}:${TAG}
+    --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
