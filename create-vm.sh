@@ -78,16 +78,16 @@ EOFKS
     echo "Kickstart file created at ${TEMP_KS}"
 fi
 
-# Create the VM using the ISO from libvirt images directory with kickstart
+# Create the VM using location with kernel/initrd from ISO
 virt-install --name ${VMNAME} \
 --os-variant fedora-coreos-stable \
 --memory 8192 \
 --vcpus 4 \
 --disk size=120 \
 --network network=${NETNAME} \
---cdrom "${TARGET_ISO}" \
+--location "${TARGET_ISO},kernel=images/pxeboot/vmlinuz,initrd=images/pxeboot/initrd.img" \
 --initrd-inject "${TEMP_KS}" \
---extra-args "inst.ks=file:/kickstart-${VMNAME}.ks console=ttyS0" \
+--extra-args "inst.ks=file:/kickstart.ks console=ttyS0" \
 --serial pty \
 --console pty,target_type=serial \
 --wait
