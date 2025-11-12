@@ -9,7 +9,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ISO="${SCRIPT_DIR}/${ISO_FILE}"
 TARGET_ISO="${LIBVIRT_IMAGES_DIR}/${ISO_FILE}"
 SOURCE_KS="${SCRIPT_DIR}/${KS_FILE}"
-TEMP_KS="/tmp/kickstart.ks"
 
 # Check if source ISO file exists
 if [ ! -f "${SOURCE_ISO}" ]; then
@@ -37,14 +36,9 @@ else
     echo "ISO already exists at ${TARGET_ISO}, skipping copy"
 fi
 
-# Create or use existing kickstart file
-# Use a temp file named kickstart.ks to match what we reference in --extra-args
-if [ -f "${SOURCE_KS}" ]; then
-    echo "Using existing kickstart file: ${SOURCE_KS}"
-    cp "${SOURCE_KS}" "${TEMP_KS}"
-else
-    echo "Creating kickstart file with LVM partitioning..."
-    cat > "${TEMP_KS}" <<'EOFKS'
+# Create kickstart file with LVM partitioning
+echo "Creating kickstart file with LVM partitioning..."
+cat > "${SOURCE_KS}" <<'EOFKS'
 lang en_US.UTF-8
 keyboard us
 timezone UTC
@@ -76,8 +70,7 @@ ostreecontainer --transport oci --url /run/install/repo/container
 %post --log=/dev/console --erroronfail
 %end
 EOFKS
-    echo "Kickstart file created at ${TEMP_KS}"
-fi
+echo "Kickstart file created at ${SOURCE_KS}"
 
 # Create the VM using location with kernel/initrd from ISO
 virt-install --name ${VMNAME} \
@@ -87,11 +80,11 @@ virt-install --name ${VMNAME} \
 --disk size=120 \
 --network network=${NETNAME} \
 --location "${TARGET_ISO},kernel=images/pxeboot/vmlinuz,initrd=images/pxeboot/initrd.img" \
---initrd-inject "${TEMP_KS}" \
+--initrd-inject "${SOURCE_KS}" \
 --extra-args "inst.ks=file:/kickstart.ks console=ttyS0" \
 --serial pty \
 --console pty,target_type=serial \
 --wait
 
 # Clean up temporary kickstart file
-rm -f "${TEMP_KS}"
+rm -f "${SOURCE_KS}"
