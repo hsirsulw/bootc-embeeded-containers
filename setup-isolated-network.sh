@@ -8,6 +8,7 @@ set -e
 
 # Configuration
 NETWORK_NAME="bootc-isolated"
+BRIDGE_NAME="virbr-bootc"
 NETWORK_IP="192.168.100.1"
 NETWORK_NETMASK="255.255.255.0"
 NETWORK_RANGE_START="192.168.100.2"
@@ -39,16 +40,18 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Check if network already exists
-if virsh net-info "${NETWORK_NAME}" &>/dev/null; then
+# Check if network already exists (defined or active)
+if virsh net-info "${NETWORK_NAME}" &>/dev/null || virsh net-list --all --name | grep -q "^${NETWORK_NAME}$"; then
     print_warn "Network '${NETWORK_NAME}' already exists"
     read -p "Do you want to destroy and recreate it? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_info "Destroying existing network..."
+        # Try to destroy if active
         if virsh net-destroy "${NETWORK_NAME}" &>/dev/null; then
             print_info "Network destroyed"
         fi
+        # Undefine the network
         if virsh net-undefine "${NETWORK_NAME}" &>/dev/null; then
             print_info "Network undefined"
         fi
@@ -65,7 +68,7 @@ cat > "${NETWORK_XML}" <<EOF
   <name>${NETWORK_NAME}</name>
   <uuid>$(uuidgen)</uuid>
   <forward mode='none'/>
-  <bridge name='virbr-${NETWORK_NAME}' stp='on' delay='0'/>
+  <bridge name='${BRIDGE_NAME}' stp='on' delay='0'/>
   <ip address='${NETWORK_IP}' netmask='${NETWORK_NETMASK}'>
     <dhcp>
       <range start='${NETWORK_RANGE_START}' end='${NETWORK_RANGE_END}'/>

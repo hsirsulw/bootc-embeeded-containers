@@ -1,16 +1,17 @@
 VMNAME=microshift-4.19-bootc-vm1
 NETNAME=bootc-isolated
-#sudo virt-install \
-#    --name ${VMNAME} \
-#    --vcpus 2 \
-#    --memory 2048 \
-#    --disk path=/var/lib/libvirt/images/${VMNAME}.qcow2,size=20 \
-#    --network network=${NETNAME},model=virtio \
-#    --events on_reboot=restart \
-#    --location /var/lib/libvirt/images/rhel-9.4-$(uname -m)-boot.iso \
-#    --initrd-inject kickstart.ks \
-#    --extra-args "inst.ks=file://kickstart.ks" \
-#    --wait
+ISO_FILE="microshift-4.19-bootc-embeeded-v1.iso"
+
+# Get the directory where the script is located or use current directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ISO_PATH="${SCRIPT_DIR}/${ISO_FILE}"
+
+# Check if ISO file exists
+if [ ! -f "${ISO_PATH}" ]; then
+    echo "Error: ISO file not found at ${ISO_PATH}"
+    echo "Please ensure the ISO file exists or update ISO_FILE variable"
+    exit 1
+fi
 
 sudo virt-install --name ${VMNAME} \
 --os-variant fedora-coreos-stable \
@@ -18,6 +19,5 @@ sudo virt-install --name ${VMNAME} \
 --vcpus 4 \
 --disk size=120 \
 --network network=${NETNAME} \
---location ${VMNAME}.iso,kernel=images/pxeboot/vmlinuz,initrd=images/pxeboot/initrd.img \
---initrd-inject kickstart.ks \
---extra-args "inst.ks=file:/kickstart.ks"
+--cdrom "${ISO_PATH}" \
+--wait
