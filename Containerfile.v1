@@ -1,4 +1,4 @@
-FROM localhost/microshift-4.18-bootc:latest
+FROM localhost/microshift-4.19-bootc:latest
 
 ARG USHIFT_BASE_IMAGE_NAME
 ARG USHIFT_BASE_IMAGE_TAG
