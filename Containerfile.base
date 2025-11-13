@@ -1,13 +1,12 @@
-#FROM registry.redhat.io/rhel9-eus/rhel-9.4-bootc:9.4
 FROM registry.redhat.io/rhel9-eus/rhel-9.6-bootc:9.6
-ARG USHIFT_VER=4.19
 ARG VERSION_ID="9.6"
 
 ## Needed as bootc-image-builder requires a repo file to be present in the base image.
-ADD redhat-96-419.repo /etc/yum.repos.d/redhat.repo
-#ADD redhat-94-418.repo /etc/yum.repos.d/redhat.repo
+#ADD redhat-96-419.repo /etc/yum.repos.d/redhat.repo
+ADD /etc/yum.repos.d/redhat.repo /etc/yum.repos.d/redhat.repo
 # workaround for this lab, as we didn't managed to push signatures for lvm operator and ubi images from registry.redhat.io 
-ADD policy.json /etc/containers/policy.json
+#ADD policy.json /etc/containers/policy.json
+ADD /etc/containers/policy.json /etc/containers/policy.json
 
 RUN dnf install -y --releasever="${VERSION_ID}" firewalld jq microshift microshift-release-info cockpit openscap-utils scap-security-guide && \
     systemctl enable microshift && \

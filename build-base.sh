@@ -1,7 +1,13 @@
 #!/bin/bash
 USER_PASSWD=redhat02
-IMAGE_NAME=microshift-4.18-bootc
+IMAGE_NAME=microshift-4.19-bootc
 
+cp /etc/yum.repos.d/redhat.repo /home/lab-user/bootc-embedded-containers
+cp /etc/containers/policy.json /home/lab-user/bootc-embedded-containers
+dnf config-manager \
+        --set-enabled rhocp-4.19-for-rhel-9-$(uname -m)-rpms \
+        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
+        --set-disabled rhocp-4.18-for-rhel-9-$(uname -m)-rpms
 # Run podman build as root to allow for :z relabeling
 #
 # Mount the host subscription data
