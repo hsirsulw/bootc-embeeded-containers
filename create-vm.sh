@@ -55,7 +55,7 @@ reqpart --add-boot
 # Add an LVM volume group and allocate a system root logical volume
 part pv.01 --grow
 volgroup rhel pv.01
-logvol / --vgname=rhel --fstype=xfs --size=10240 --name=root
+logvol / --vgname=rhel --fstype=xfs --size=50240 --name=root
 
 # Lock root user account
 rootpw --lock
