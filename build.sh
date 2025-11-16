@@ -64,3 +64,5 @@ sudo podman run --rm -it --privileged --security-opt label=type:unconfined_t \
    --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
     registry.redhat.io/rhel9/bootc-image-builder:latest \
     --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
+
+cp -v /var/tmp/bootc-images/bootiso/install.iso microshift-4.19-bootc-embeeded-v1.iso
