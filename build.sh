@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-IMAGE_NAME=microshift-4.19-bootc-embeeded
 REGISTRY_URL=quay.io
 TAG=$1
 
@@ -11,8 +10,36 @@ if [ -z "$TAG" ]; then
     exit 1
 fi
 
+# Set IMAGE_NAME and BASE_IMAGE_NAME based on TAG (case-insensitive)
+TAG_LOWER=$(echo "$TAG" | tr '[:upper:]' '[:lower:]')
+case "$TAG_LOWER" in
+    v1)
+        IMAGE_NAME=microshift-4.19-bootc-embeeded
+        BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
+        ;;
+    v2)
+        IMAGE_NAME=microshift-4.20-bootc-embeeded
+        BASE_IMAGE_NAME=microshift-4.20-bootc:${TAG}
+        ;;
+    *)
+        echo "Error: TAG must be either v1/V1 or v2/V2"
+        exit 1
+        ;;
+esac
+
 #REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
-BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
+
+# For v2, configure dnf repositories
+if [ "$TAG_LOWER" = "v2" ]; then
+    echo "#### Configuring dnf repositories for v2"
+    sudo dnf config-manager \
+        --set-enabled rhocp-4.20-for-rhel-9-$(uname -m)-rpms \
+        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
+    sudo dnf config-manager \
+        --set-disabled rhocp-4.18-for-rhel-9-$(uname -m)-rpms \
+        --set-disabled rhocp-4.19-for-rhel-9-$(uname -m)-rpms
+    cp /etc/yum.repos.d/redhat.repo /home/lab-user/bootc-embeeded-containers
+fi
 
 echo "#### Building a new bootc image with MicroShift and application Container images embeeded to it"
 sudo podman build -t "${IMAGE_NAME}:${TAG}" \
