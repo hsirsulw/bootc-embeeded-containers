@@ -55,14 +55,17 @@ sudo podman build -t "${IMAGE_NAME}:${TAG}" \
 #echo "#### pushing bootc image to a registry"
 #podman push "localhost/${IMAGE_NAME}:${TAG}" "${REGISTRY_URL}/${REGISTRY_IMG}:${TAG}"
 
-sudo mkdir -p /var/tmp/bootc-images
-echo "#### creating ISO from bootc image"
-sudo podman run --rm -it --privileged --security-opt label=type:unconfined_t \
-   -v /var/lib/containers/storage:/var/lib/containers/storage \
-   -v /var/tmp/bootc-images:/output \
-   --volume /etc/rhsm:/etc/rhsm:ro \
-   --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
-    registry.redhat.io/rhel9/bootc-image-builder:latest \
-    --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
+# Only create ISO for v1
+if [ "$TAG_LOWER" = "v1" ]; then
+    sudo mkdir -p /var/tmp/bootc-images
+    echo "#### creating ISO from bootc image"
+    sudo podman run --rm -it --privileged --security-opt label=type:unconfined_t \
+       -v /var/lib/containers/storage:/var/lib/containers/storage \
+       -v /var/tmp/bootc-images:/output \
+       --volume /etc/rhsm:/etc/rhsm:ro \
+       --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
+        registry.redhat.io/rhel9/bootc-image-builder:latest \
+        --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
 
-cp -v /var/tmp/bootc-images/bootiso/install.iso microshift-4.19-bootc-embeeded-v1.iso
+    cp -v /var/tmp/bootc-images/bootiso/install.iso microshift-4.19-bootc-embeeded-v1.iso
+fi
