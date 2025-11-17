@@ -6,8 +6,6 @@ ADD redhat.repo /etc/yum.repos.d/redhat.repo
 RUN dnf update --enablerepo=rhel-9-for-$(uname -m)-baseos-eus-rpms --enablerepo=rhel-9-for-x86_64-appstream-eus-rpms -y --releasever=9.6 && \
     dnf clean all
 
-#We clean the previous image list file to avoid duplicate entries from 4.19 release
-RUN echo "" > /usr/lib/containers/storage/image-list.txt
 # Pull the container images into /usr/lib/containers/storage:
 # - Each image goes into a separate sub-directory
 # - Sub-directories are named after the image reference string SHA
@@ -19,6 +17,7 @@ RUN --mount=type=secret,id=pullsecret,dst=/run/secrets/pull-secret.json \
     for img in ${images} ; do \
        /usr/bin/embed_image.sh ${img} --authfile /run/secrets/pull-secret.json ; \
      done 
+RUN cat /usr/share/microshift/release/release-"$(uname -m)".json|jq .
 # Then for Applications
 RUN --mount=type=secret,id=pullsecret,dst=/run/secrets/pull-secret.json <<PULL
     /usr/bin/embed_image.sh docker.io/library/wordpress:6.2.1-apache

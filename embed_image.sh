@@ -7,7 +7,7 @@ additional_copy_args="${2:-""} ${3:-""}"
 
 mkdir -p /usr/lib/containers/storage
 sha=$(echo "$image" | sha256sum | awk '{ print $1 }')
-
+echo "" > /usr/lib/containers/storage/image-list.txt
 #  The LVMS image is "special" because it's a multi-arch manifest, so --all tries copy all platforms and fails. Also using target as sha doesn't work. 
 if [[ $image == *"lvm"* || $image == *"ubi"* ]]; then
    aux=$(echo $image|cut -d\@ -f1)
