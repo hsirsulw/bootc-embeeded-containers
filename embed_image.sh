@@ -14,6 +14,6 @@ sha=$(echo "$image" | sha256sum | awk '{ print $1 }')
 #else
 #   skopeo copy --format v2s2 $additional_copy_args docker://$image dir:/usr/lib/containers/storage/$sha
 #fi
-skopeo copy --all --preserve-digests --format v2s2 $additional_copy_args docker://$image dir:/usr/lib/containers/storage/$sha
+skopeo copy --all --format v2s2 $additional_copy_args docker://$image dir:/usr/lib/containers/storage/$sha
 
 echo "$image,$sha" >> /usr/lib/containers/storage/image-list.txt
