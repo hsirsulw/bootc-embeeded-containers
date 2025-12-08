@@ -1,7 +1,7 @@
-FROM localhost/microshift-4.19-bootc-embeeded:v1
+FROM localhost/microshift-bootc-embeeded:4.19
 COPY ./embed_image.sh /usr/bin/
 ## Needed as bootc-image-builder requires a repo file to be present in the base image.
-# in the build.sh with TAG=v2, we replace the 4.19 repo with the 4.20 repo to allow upgrade MicroShift to 4.20. 
+# in the build.sh with TAG=4.20, we replace the 4.19 repo with the 4.20 repo to allow upgrade MicroShift to 4.20. 
 ADD redhat.repo /etc/yum.repos.d/redhat.repo
 RUN dnf update --enablerepo=rhel-9-for-$(uname -m)-baseos-eus-rpms --enablerepo=rhel-9-for-x86_64-appstream-eus-rpms -y --releasever=9.6 && \
     dnf clean all
