@@ -19,7 +19,7 @@ case "$TAG_LOWER" in
         ;;
     4.20)
         IMAGE_NAME=microshift-bootc-embeeded
-        BASE_IMAGE_NAME=microshift-bootc:base
+        BASE_IMAGE_NAME=microshift-bootc:4.19
         ;;
     *)
         echo "Error: TAG must be either 4.19 or 4.20"
