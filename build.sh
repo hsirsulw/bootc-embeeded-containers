@@ -13,25 +13,25 @@ fi
 # Set IMAGE_NAME and BASE_IMAGE_NAME based on TAG (case-insensitive)
 TAG_LOWER=$(echo "$TAG" | tr '[:upper:]' '[:lower:]')
 case "$TAG_LOWER" in
-    v1)
-        IMAGE_NAME=microshift-4.19-bootc-embeeded
-        BASE_IMAGE_NAME=microshift-4.19-bootc:${TAG}
+    4.19)
+        IMAGE_NAME=microshift-bootc-embeeded
+        BASE_IMAGE_NAME=microshift-bootc:base
         ;;
-    v2)
-        IMAGE_NAME=microshift-4.20-bootc-embeeded
-        BASE_IMAGE_NAME=microshift-4.20-bootc:${TAG}
+    4.20)
+        IMAGE_NAME=microshift-bootc-embeeded
+        BASE_IMAGE_NAME=microshift-bootc:4.19
         ;;
     *)
-        echo "Error: TAG must be either v1/V1 or v2/V2"
+        echo "Error: TAG must be either 4.19 or 4.20"
         exit 1
         ;;
 esac
 
 #REGISTRY_IMG="rhn_support_arolivei/${IMAGE_NAME}"
 
-# For v2, configure dnf repositories
-if [ "$TAG_LOWER" = "v2" ]; then
-    echo "#### Configuring dnf repositories for v2"
+# For 4.20, configure dnf repositories
+if [ "$TAG_LOWER" = "4.20" ]; then
+    echo "#### Configuring dnf repositories for 4.20"
     sudo dnf config-manager \
         --set-enabled rhocp-4.20-for-rhel-9-$(uname -m)-rpms \
         --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
@@ -55,8 +55,8 @@ sudo podman build -t "${IMAGE_NAME}:${TAG}" \
 #echo "#### pushing bootc image to a registry"
 #podman push "localhost/${IMAGE_NAME}:${TAG}" "${REGISTRY_URL}/${REGISTRY_IMG}:${TAG}"
 
-# Only create ISO for v1
-if [ "$TAG_LOWER" = "v1" ]; then
+# Only create ISO for 4.19
+if [ "$TAG_LOWER" = "4.19" ]; then
     sudo mkdir -p /var/tmp/bootc-images
     echo "#### creating ISO from bootc image"
     sudo podman run --rm -it --privileged --security-opt label=type:unconfined_t \
@@ -67,5 +67,5 @@ if [ "$TAG_LOWER" = "v1" ]; then
         registry.redhat.io/rhel9/bootc-image-builder:latest \
         --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
 
-    cp -v /var/tmp/bootc-images/bootiso/install.iso microshift-4.19-bootc-embeeded-v1.iso
+    cp -v /var/tmp/bootc-images/bootiso/install.iso microshift-bootc-embeeded-4.19.iso
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 USER_PASSWD=redhat02
-IMAGE_NAME=microshift-4.19-bootc
+IMAGE_NAME=microshift-bootc:base
 
 dnf config-manager \
         --set-enabled rhocp-4.19-for-rhel-9-$(uname -m)-rpms \
