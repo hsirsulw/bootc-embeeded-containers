@@ -4,7 +4,7 @@ ARG VERSION_ID="9.6"
 ## Needed as bootc-image-builder requires a repo file to be present in the base image.
 ADD redhat.repo /etc/yum.repos.d/redhat.repo
 # workaround for this lab, as we didn't managed to push signatures for lvm operator and ubi images from registry.redhat.io 
-ADD local-registry.yaml /etc/containers/registries.d/local-registry.yaml
+ADD registry-5000.yaml /etc/containers/registries.d/registry-5000.yaml
 
 RUN dnf install -y --releasever="${VERSION_ID}" firewalld jq microshift microshift-release-info cockpit openscap-utils scap-security-guide && \
     systemctl enable microshift && \
