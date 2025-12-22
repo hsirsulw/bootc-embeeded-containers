@@ -45,6 +45,7 @@ echo "#### Building a new bootc image with MicroShift and application Container 
 sudo podman build -t "${IMAGE_NAME}:${TAG}" \
     --volume /etc/rhsm:/etc/rhsm:ro,z \
     --volume /etc/pki/entitlement:/etc/pki/entitlement:ro,z \
+    --volume /etc/containers/registries.d/registry-5000.yaml:/etc/containers/registries.d/registry-5000.yaml:ro,z \    
     --volume /etc/yum.repos.d:/etc/yum.repos.d:ro,z \
     --volume /etc/containers/registries.conf.d/99-mirrors.conf:/etc/containers/registries.conf.d/99-mirrors.conf:ro,z \
     --volume /etc/containers/policy.json:/etc/containers/policy.json:ro,z \
@@ -64,6 +65,7 @@ if [ "$TAG_LOWER" = "4.19" ]; then
        -v /var/tmp/bootc-images:/output \
        --volume /etc/rhsm:/etc/rhsm:ro \
        --volume /etc/pki/entitlement:/etc/pki/entitlement:ro \
+       --volume /etc/containers/registries.d/registry-5000.yaml:/etc/containers/registries.d/registry-5000.yaml:ro \
         registry.redhat.io/rhel9/bootc-image-builder:latest \
         --progress=verbose --local --type iso localhost/${IMAGE_NAME}:${TAG}
 
